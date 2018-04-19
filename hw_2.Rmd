@@ -1,0 +1,149 @@
+---
+title: "CSSS 512 HW 2"
+author: "Chris Hess"
+date: "April 19, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=F, results='hide'}
+#packages
+library(tidyverse)
+library(curl)
+library(xts)
+library(latex2exp)
+library(forecast)
+library(xtable)
+
+#data from Chris's website
+congress <- read_csv(curl("https://faculty.washington.edu/cadolph/panUW/congress.csv"))
+```
+
+## Problem 1 - House of Representatives
+
+### Part a
+
+```{r, warning = F}
+#plot ts, ACF, PACF
+#run ADF and PP tests
+#demean by pre/post 1994 periods
+#plot ts, ACF, PACF
+#what effect does 1994 structural break have on ts?
+
+#pull ts, every other year frequency 1963-2017
+ts_house <- ts(congress$DemHouseMaj, 
+               frequency = 1/2,
+               start = 1963, end = 2017)
+
+#plot as observed
+autoplot(ts_house) +
+  geom_hline(yintercept = 0, linetype = 3, color = "grey60") +
+  geom_vline(xintercept = 1994, color = "Blue") +
+  theme_minimal() +
+  labs(title = "Democratic House Majority Time-series")
+
+#observed ACF
+ggAcf(ts_house) + #substantial autocorrelation but not quite geometric decline
+  theme_minimal() +
+  labs(title = "Democratic House Majority ACF")
+
+#observed PACF
+ggPacf(ts_house) + #AR(1), phi = .65 ish
+  theme_minimal() +
+  labs(title = "Democratic House Majority PACF")
+
+#pre-1994 mean for ts
+preMean <- congress %>% 
+  filter(StartYear < 1994) %>% 
+  summarize(mean = mean(DemHouseMaj)) %>% 
+  pull(mean)
+
+#post-1994 mean for ts
+postMean <- congress %>% 
+  filter(StartYear >= 1994) %>% 
+  summarize(mean = mean(DemHouseMaj)) %>% 
+  pull(mean)
+
+#demean based on pre/post 1994 (i.e. 1-16th obs vs 17-28th obs)
+ts_house[1:16] <- ts_house[1:16] - preMean 
+ts_house[-1:-16] <- ts_house[-1:-16] - postMean
+
+#demeaned ts - looks stationary now
+autoplot(ts_house) +
+  geom_hline(yintercept = 0, linetype = 3, color = "grey60") +
+  geom_vline(xintercept = 1994, color = "Blue") +
+  theme_minimal() +
+  labs(title = "Democratic House Majority Time-series")
+
+#demeaned ACF
+ggAcf(ts_house) + #no autocorrelation
+  theme_minimal() +
+  labs(title = "Democratic House Majority ACF")
+
+#demeaned PACF
+ggPacf(ts_house) + #no need for lags
+  theme_minimal() +
+  labs(title = "Democratic House Majority PACF")
+```
+
+### Part b 
+
+```{r}
+#pull ts, every other year frequency 1963-2017
+ts_house <- ts(congress$DemHouseMaj, 
+               frequency = 1/2,
+               start = 1963, end = 2017)
+
+#create df of covariates
+covar <- congress %>% select(PartisanMidterm, PartisanUnem, Coattails)
+
+armaFit <- function(ts, order = c(0, 0, 0), xdf = NULL){
+  mod <- Arima(ts, order = order, xreg = xdf)
+  lab.order <- paste0("(", order[1], ",", order[2], ",", order[3], ")")
+  aic <- mod[['aic']]
+  se_reg <- sqrt(mod[['sigma2']])
+  coef <- mod[['coef']]
+  coef <- coef[c((length(coef)-2), (length(coef)-1), length(coef))]
+  se <- sqrt(diag(mod[['var.coef']]))
+  se <- se[c((length(se)-2), (length(se)-1), length(se))]
+  
+  names(lab.order) <- "ARMA Model"
+  names(aic) <- "AIC"
+  names(se_reg) <- "SE"
+  
+  oneline <- c(lab.order, aic, se_reg, coef)
+  twoline <- c("", "", "", paste0("(", se, ")"))
+  lines <- rbind(oneline, twoline)
+  rownames(lines) <- NULL
+  
+  return(lines)
+}
+
+ar0 <- armaFit(ts_house, order = c(0, 0, 0), xdf = covar)
+xtable(ar0)
+```
+
+### Part c
+
+```{r}
+covar <- congress %>% select(PartisanMidterm, PartisanUnem, Coattails)
+
+ar1 <- armaFit(ts_house, order = c(1, 0, 0), xdf = covar)
+tab.ar1 <- xtable(ar1)
+
+ar2 <- armaFit(ts_house, order = c(2, 0, 0), xdf = covar)
+tab.ar2 <- xtable(ar2)
+
+ma1 <- armaFit(ts_house, order = c(0, 0, 1), xdf = covar)
+tab.ma1 <- xtable(ma1)
+
+arma11 <- armaFit(ts_house, order = c(1, 0, 1), xdf = covar)
+tab.arma11 <- xtable(arma11)
+
+sums <- rbind(ar0, ar1, ar2, ma1, arma11)
+xtable(sums)
+```
+
+
+
+
+
