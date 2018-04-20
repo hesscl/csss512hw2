@@ -22,7 +22,7 @@ congress <- read_csv(curl("https://faculty.washington.edu/cadolph/panUW/congress
 
 ### Part a
 
-```{r, warning = F}
+```{r 1.a, warning = F}
 #plot ts, ACF, PACF
 #run ADF and PP tests
 #demean by pre/post 1994 periods
@@ -87,15 +87,16 @@ ggPacf(ts_house) + #no need for lags
 
 ### Part b 
 
-```{r}
+```{r 1.b}
 #pull ts, every other year frequency 1963-2017
 ts_house <- ts(congress$DemHouseMaj, 
                frequency = 1/2,
                start = 1963, end = 2017)
 
 #create df of covariates
-covar <- congress %>% select(PartisanMidterm, PartisanUnem, Coattails)
+covar <- congress %>% select(PartisanMidterm, PartisanUnem, Coattails, Pre1994)
 
+#function to provide sum stats that can be passed to xtable()
 armaFit <- function(ts, order = c(0, 0, 0), xdf = NULL){
   mod <- Arima(ts, order = order, xreg = xdf)
   lab.order <- paste0("(", order[1], ",", order[2], ",", order[3], ")")
@@ -118,32 +119,75 @@ armaFit <- function(ts, order = c(0, 0, 0), xdf = NULL){
   return(lines)
 }
 
+#AR(0) with covariates
 ar0 <- armaFit(ts_house, order = c(0, 0, 0), xdf = covar)
 xtable(ar0)
 ```
 
 ### Part c
 
-```{r}
-covar <- congress %>% select(PartisanMidterm, PartisanUnem, Coattails)
-
+```{r 1.c}
+#AR(1)
 ar1 <- armaFit(ts_house, order = c(1, 0, 0), xdf = covar)
 tab.ar1 <- xtable(ar1)
 
+#AR(2)
 ar2 <- armaFit(ts_house, order = c(2, 0, 0), xdf = covar)
 tab.ar2 <- xtable(ar2)
 
+#MA(1)
 ma1 <- armaFit(ts_house, order = c(0, 0, 1), xdf = covar)
 tab.ma1 <- xtable(ma1)
 
+#ARMA(1,1)
 arma11 <- armaFit(ts_house, order = c(1, 0, 1), xdf = covar)
 tab.arma11 <- xtable(arma11)
 
+#bind the sum stat rows together
 sums <- rbind(ar0, ar1, ar2, ma1, arma11)
 xtable(sums)
 ```
 
+### Part d
+
+```{r 1.d}
+f_ar0 <- function(x, h){forecast(Arima(x, order=c(0,0,0)), h=h)}
+e_ar0 <- tsCV(ts_house, f_ar0, h = 3,
+              window = 20)
+
+f_ar1 <- function(x, h){forecast(Arima(x, order=c(1,0,0)), h=h)}
+e_ar1 <- tsCV(ts_house, f_ar1, h = 3,
+              window = 20)
+
+f_ar2 <- function(x, h){forecast(Arima(x, order=c(2,0,0)), h=h)}
+e_ar2 <- tsCV(ts_house, far2, h = 3,
+              window = 20)
+
+f_ma1 <- function(x, h){forecast(Arima(x, order=c(0,0,1)), h=h)}
+e_ma1 <- tsCV(ts_house, f_ma1, h = 3,
+              window = 20)
+
+f_arma11 <- function(x, h){forecast(Arima(x, order=c(1,0,1)), h=h)}
+e_arma11 <- tsCV(ts_house, f_arma11, h = 3,
+              window = 20)
+```
 
 
+### Part e
+
+```{r}
+cf1 <- data.frame(
+  "Pre1994" = rep(0, 3), #all forecasts are post1994
+  "ParisanUnemp" = rep(4.6, 3),
+  "PartisanMidterm" = c(-1, 0, 1),
+  "Coattails" = c(0, 1, 0)
+)
+
+#MAY NEED TO CHANGE THE MODEL SPEC, TESTING WITH ARMA(1,1)
+
+#train arma(1,1) based on e
+arma11 <- Arima(ts_house, order = c(1, 0, 1), xreg = covar)
+
+```
 
 
