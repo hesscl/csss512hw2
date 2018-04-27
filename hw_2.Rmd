@@ -15,7 +15,7 @@ library(forecast)
 library(xtable)
 
 #data from Chris's website
-congress <- read_csv(curl("https://faculty.washington.edu/cadolph/panUW/congress.csv"))
+congress <- read_csv("./congress.csv")
 ```
 
 ## Problem 1 - House of Representatives

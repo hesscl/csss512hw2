@@ -194,15 +194,24 @@ ggPacf(ts_house) + #no need for lags
 </div>
 <div id="part-b" class="section level3">
 <h3>Part b</h3>
-<pre class="r"><code>covar &lt;- congress %&gt;% select(PartisanMidterm, PartisanUnem, Coattails)
+<pre class="r"><code>#pull ts, every other year frequency 1963-2017
+ts_house &lt;- ts(congress$DemHouseMaj, 
+               frequency = 1/2,
+               start = 1963, end = 2017)
 
+#create df of covariates
+covar &lt;- congress %&gt;% select(PartisanMidterm, PartisanUnem, Coattails, Pre1994)
+
+#function to provide sum stats that can be passed to xtable()
 armaFit &lt;- function(ts, order = c(0, 0, 0), xdf = NULL){
   mod &lt;- Arima(ts, order = order, xreg = xdf)
   lab.order &lt;- paste0(&quot;(&quot;, order[1], &quot;,&quot;, order[2], &quot;,&quot;, order[3], &quot;)&quot;)
   aic &lt;- mod[['aic']]
   se_reg &lt;- sqrt(mod[['sigma2']])
   coef &lt;- mod[['coef']]
+  coef &lt;- coef[c((length(coef)-2), (length(coef)-1), length(coef))]
   se &lt;- sqrt(diag(mod[['var.coef']]))
+  se &lt;- se[c((length(se)-2), (length(se)-1), length(se))]
   
   names(lab.order) &lt;- &quot;ARMA Model&quot;
   names(aic) &lt;- &quot;AIC&quot;
@@ -216,11 +225,101 @@ armaFit &lt;- function(ts, order = c(0, 0, 0), xdf = NULL){
   return(lines)
 }
 
+#AR(0) with covariates
 ar0 &lt;- armaFit(ts_house, order = c(0, 0, 0), xdf = covar)
-tab.ar0 &lt;- xtable(ar0)</code></pre>
+xtable(ar0)</code></pre>
+<pre><code>## % latex table generated in R 3.2.3 by xtable 1.8-2 package
+## % Fri Apr 27 11:05:27 2018
+## \begin{table}[ht]
+## \centering
+## \begin{tabular}{rllllll}
+##   \hline
+##  &amp; ARMA Model &amp; AIC &amp; SE &amp; PartisanUnem &amp; Coattails &amp; Pre1994 \\ 
+##   \hline
+## 1 &amp; (0,0,0) &amp; 239.242563583718 &amp; 15.4455283621867 &amp; -2.05331763510672 &amp; 18.3960875361052 &amp; 47.9938325523354 \\ 
+##   2 &amp;  &amp;  &amp;  &amp; (1.73266669978642) &amp; (5.3312694831819) &amp; (5.70324335931118) \\ 
+##    \hline
+## \end{tabular}
+## \end{table}</code></pre>
 </div>
 <div id="part-c" class="section level3">
 <h3>Part c</h3>
+<pre class="r"><code>#AR(1)
+ar1 &lt;- armaFit(ts_house, order = c(1, 0, 0), xdf = covar)
+tab.ar1 &lt;- xtable(ar1)
+
+#AR(2)
+ar2 &lt;- armaFit(ts_house, order = c(2, 0, 0), xdf = covar)
+tab.ar2 &lt;- xtable(ar2)
+
+#MA(1)
+ma1 &lt;- armaFit(ts_house, order = c(0, 0, 1), xdf = covar)
+tab.ma1 &lt;- xtable(ma1)
+
+#ARMA(1,1)
+arma11 &lt;- armaFit(ts_house, order = c(1, 0, 1), xdf = covar)
+tab.arma11 &lt;- xtable(arma11)
+
+#bind the sum stat rows together
+sums &lt;- rbind(ar0, ar1, ar2, ma1, arma11)
+xtable(sums)</code></pre>
+<pre><code>## % latex table generated in R 3.2.3 by xtable 1.8-2 package
+## % Fri Apr 27 11:05:27 2018
+## \begin{table}[ht]
+## \centering
+## \begin{tabular}{rllllll}
+##   \hline
+##  &amp; ARMA Model &amp; AIC &amp; SE &amp; PartisanUnem &amp; Coattails &amp; Pre1994 \\ 
+##   \hline
+## 1 &amp; (0,0,0) &amp; 239.242563583718 &amp; 15.4455283621867 &amp; -2.05331763510672 &amp; 18.3960875361052 &amp; 47.9938325523354 \\ 
+##   2 &amp;  &amp;  &amp;  &amp; (1.73266669978642) &amp; (5.3312694831819) &amp; (5.70324335931118) \\ 
+##   3 &amp; (1,0,0) &amp; 240.22097166963 &amp; 15.4916494562879 &amp; -2.4200522142972 &amp; 15.3641378752965 &amp; 46.6561936690235 \\ 
+##   4 &amp;  &amp;  &amp;  &amp; (1.75037155044221) &amp; (5.82751933207039) &amp; (7.02250058514922) \\ 
+##   5 &amp; (2,0,0) &amp; 239.661751522405 &amp; 15.0500952274466 &amp; -2.8575699740271 &amp; 10.2791800919377 &amp; 44.729485876245 \\ 
+##   6 &amp;  &amp;  &amp;  &amp; (1.74352069542351) &amp; (5.86158347338774) &amp; (6.03804943043838) \\ 
+##   7 &amp; (0,0,1) &amp; 239.49523228898 &amp; 15.26274274973 &amp; -2.76076421356276 &amp; 13.1213438584269 &amp; 45.3861300132325 \\ 
+##   8 &amp;  &amp;  &amp;  &amp; (1.84133337599422) &amp; (6.31491484206019) &amp; (7.57976917282651) \\ 
+##   9 &amp; (1,0,1) &amp; 238.095817412667 &amp; 14.0750472981267 &amp; -3.84638858882772 &amp; 14.521536340183 &amp; 42.887010661738 \\ 
+##   10 &amp;  &amp;  &amp;  &amp; (1.48443882936292) &amp; (6.05780637155323) &amp; (6.62285269239559) \\ 
+##    \hline
+## \end{tabular}
+## \end{table}</code></pre>
+</div>
+<div id="part-d" class="section level3">
+<h3>Part d</h3>
+<pre class="r"><code>f_ar0 &lt;- function(x, h){forecast(Arima(x, order=c(0,0,0)), h=h)}
+e_ar0 &lt;- tsCV(ts_house, f_ar0, h = 3,
+              window = 20)
+
+f_ar1 &lt;- function(x, h){forecast(Arima(x, order=c(1,0,0)), h=h)}
+e_ar1 &lt;- tsCV(ts_house, f_ar1, h = 3,
+              window = 20)
+
+f_ar2 &lt;- function(x, h){forecast(Arima(x, order=c(2,0,0)), h=h)}
+e_ar2 &lt;- tsCV(ts_house, far2, h = 3,
+              window = 20)
+
+f_ma1 &lt;- function(x, h){forecast(Arima(x, order=c(0,0,1)), h=h)}
+e_ma1 &lt;- tsCV(ts_house, f_ma1, h = 3,
+              window = 20)
+
+f_arma11 &lt;- function(x, h){forecast(Arima(x, order=c(1,0,1)), h=h)}
+e_arma11 &lt;- tsCV(ts_house, f_arma11, h = 3,
+              window = 20)</code></pre>
+</div>
+<div id="part-e" class="section level3">
+<h3>Part e</h3>
+<pre class="r"><code>cf1 &lt;- data.frame(
+  &quot;Pre1994&quot; = rep(0, 3), #all forecasts are post1994
+  &quot;ParisanUnemp&quot; = rep(4.6, 3),
+  &quot;PartisanMidterm&quot; = c(-1, 0, 1),
+  &quot;Coattails&quot; = c(0, 1, 0)
+)
+
+#MAY NEED TO CHANGE THE MODEL SPEC, TESTING WITH ARMA(1,1)
+
+#train arma(1,1) based on e
+arma11 &lt;- Arima(ts_house, order = c(1, 0, 1), xreg = covar)</code></pre>
 </div>
 </div>
 
