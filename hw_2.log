@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99999 (MiKTeX 2.9.6650 64-bit) (preloaded format=xelatex 2018.4.4)  3 MAY 2018 12:03
+This is XeTeX, Version 3.14159265-2.6-0.99999 (MiKTeX 2.9.6650 64-bit) (preloaded format=xelatex 2018.4.4)  3 MAY 2018 13:22
 entering extended mode
 **./hw_2.tex
 (hw_2.tex
@@ -894,35 +894,37 @@ Package: booktabs 2005/04/14 v1.61803 publication quality tables
 \@thisruleclass=\count285
 \@lastruleclass=\count286
 \@thisrulewidth=\dimen177
+) ("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\lscape.sty"
+Package: lscape 2000/10/22 v3.01 Landscape Pages (DPC)
 ) (hw_2.aux)
 \openout1 = `hw_2.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 129.
-LaTeX Font Info:    ... okay on input line 129.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 129.
-LaTeX Font Info:    ... okay on input line 129.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 129.
-LaTeX Font Info:    ... okay on input line 129.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 129.
-LaTeX Font Info:    ... okay on input line 129.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 129.
-LaTeX Font Info:    ... okay on input line 129.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 129.
-LaTeX Font Info:    ... okay on input line 129.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 129.
-LaTeX Font Info:    ... okay on input line 129.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 129.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 129.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 130.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 130.
 
 ("C:\Program Files\MiKTeX 2.9\tex\latex\base\ts1cmr.fd"
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 129.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 129.
-LaTeX Font Info:    ... okay on input line 129.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 129.
-LaTeX Font Info:    ... okay on input line 129.
-LaTeX Info: Redefining \microtypecontext on input line 129.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 130.
+LaTeX Font Info:    ... okay on input line 130.
+LaTeX Info: Redefining \microtypecontext on input line 130.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using protrusion set `basicmath'.
 Package microtype Info: No adjustment of tracking.
@@ -966,7 +968,7 @@ Package microtype Info: Loading generic protrusion settings for font family
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
 \AtBeginShipoutBox=\box45
-Package hyperref Info: Link coloring OFF on input line 129.
+Package hyperref Info: Link coloring OFF on input line 130.
 ("C:\Program Files\MiKTeX 2.9\tex\latex\hyperref\nameref.sty"
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
 ("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\gettitlestring.sty"
@@ -974,23 +976,23 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
 \c@section@level=\count287
 )
-LaTeX Info: Redefining \ref on input line 129.
-LaTeX Info: Redefining \pageref on input line 129.
-LaTeX Info: Redefining \nameref on input line 129.
+LaTeX Info: Redefining \ref on input line 130.
+LaTeX Info: Redefining \pageref on input line 130.
+LaTeX Info: Redefining \nameref on input line 130.
 (hw_2.out) (hw_2.out)
 \@outlinefile=\write4
 \openout4 = `hw_2.out'.
 
 LaTeX Font Info:    Font shape `TU/TimesNewRoman(0)/m/n' will be
-(Font)              scaled to size 19.98586pt on input line 130.
+(Font)              scaled to size 19.98586pt on input line 131.
 LaTeX Font Info:    Font shape `TU/TimesNewRoman(0)/m/n' will be
-(Font)              scaled to size 11.56366pt on input line 130.
+(Font)              scaled to size 11.56366pt on input line 131.
 LaTeX Font Info:    Font shape `TU/TimesNewRoman(0)/m/it' will be
-(Font)              scaled to size 12.02307pt on input line 130.
+(Font)              scaled to size 12.02307pt on input line 131.
 LaTeX Font Info:    Font shape `TU/TimesNewRoman(0)/m/n' will be
-(Font)              scaled to size 13.87637pt on input line 134.
+(Font)              scaled to size 13.87637pt on input line 135.
 LaTeX Font Info:    Font shape `TU/TimesNewRoman(0)/bx/n' will be
-(Font)              scaled to size 13.59425pt on input line 134.
+(Font)              scaled to size 13.59425pt on input line 135.
 (hw_2.toc
 LaTeX Font Info:    Try loading font information for OT1+lmr on input line 1.
 ("C:\Program Files\MiKTeX 2.9\tex\latex\lm\ot1lmr.fd"
@@ -1033,11 +1035,11 @@ File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 \openout5 = `hw_2.toc'.
 
 LaTeX Font Info:    Font shape `TU/TimesNewRoman(0)/bx/n' will be
-(Font)              scaled to size 11.32855pt on input line 137.
+(Font)              scaled to size 11.32855pt on input line 138.
 LaTeX Font Info:    Font shape `TU/TimesNewRoman(0)/bx/n' will be
-(Font)              scaled to size 9.44046pt on input line 139.
+(Font)              scaled to size 9.44046pt on input line 140.
 LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <10> not available
-(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 150.
+(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 164.
 File: hw_2_files/figure-latex/1.a-1.pdf Graphic file (type pdf)
 <use hw_2_files/figure-latex/1.a-1.pdf>
 [1
@@ -1048,52 +1050,61 @@ File: hw_2_files/figure-latex/1.a-2.pdf Graphic file (type pdf)
 [2]
 File: hw_2_files/figure-latex/1.a-3.pdf Graphic file (type pdf)
 <use hw_2_files/figure-latex/1.a-3.pdf>
-[3]
+[3] [4]
 File: hw_2_files/figure-latex/1.a-4.pdf Graphic file (type pdf)
 <use hw_2_files/figure-latex/1.a-4.pdf>
-[4]
 File: hw_2_files/figure-latex/1.a-5.pdf Graphic file (type pdf)
 <use hw_2_files/figure-latex/1.a-5.pdf>
 [5]
 File: hw_2_files/figure-latex/1.a-6.pdf Graphic file (type pdf)
 <use hw_2_files/figure-latex/1.a-6.pdf>
-[6] [7] [8] [9] [10] [11]
+[6] [7]
+Underfull \vbox (badness 10000) detected at line 383
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 383
+ []
+
+[8] [9] [10] [11]
 File: hw_2_files/figure-latex/unnamed-chunk-4-1.pdf Graphic file (type pdf)
 <use hw_2_files/figure-latex/unnamed-chunk-4-1.pdf>
 [12]
 File: hw_2_files/figure-latex/2.a-1.pdf Graphic file (type pdf)
 <use hw_2_files/figure-latex/2.a-1.pdf>
+[13]
 File: hw_2_files/figure-latex/2.a-2.pdf Graphic file (type pdf)
 <use hw_2_files/figure-latex/2.a-2.pdf>
-[13]
+[14]
 File: hw_2_files/figure-latex/2.a-3.pdf Graphic file (type pdf)
 <use hw_2_files/figure-latex/2.a-3.pdf>
-[14]
+[15]
 File: hw_2_files/figure-latex/2.a-4.pdf Graphic file (type pdf)
 <use hw_2_files/figure-latex/2.a-4.pdf>
-[15]
+[16]
 File: hw_2_files/figure-latex/2.a-5.pdf Graphic file (type pdf)
 <use hw_2_files/figure-latex/2.a-5.pdf>
-[16]
+[17]
 File: hw_2_files/figure-latex/2.a-6.pdf Graphic file (type pdf)
 <use hw_2_files/figure-latex/2.a-6.pdf>
-[17] [18]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 803.
-[19]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 803.
+[18] [19] [20] [21
+
+]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 891.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 891.
 (hw_2.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 803.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 803.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 891.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 891.
 Package rerunfilecheck Info: File `hw_2.out' has not changed.
-(rerunfilecheck)             Checksum: 402884E9FFD0372EE84D94D6AED8A823.
+(rerunfilecheck)             Checksum: 3126CCCA72F83BEB7FAAB65DF4E83EFF.
  ) 
 Here is how much of TeX's memory you used:
- 22496 strings out of 427832
- 416903 string characters out of 3152396
- 559619 words of memory out of 3000000
- 26241 multiletter control sequences out of 15000+200000
+ 22512 strings out of 427832
+ 417135 string characters out of 3152396
+ 555620 words of memory out of 3000000
+ 26254 multiletter control sequences out of 15000+200000
  543039 words of font info for 58 fonts, out of 3000000 for 9000
  1328 hyphenation exceptions out of 8191
- 46i,9n,116p,10447b,373s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 46i,9n,116p,10447b,375s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on hw_2.pdf (19 pages).
+Output written on hw_2.pdf (21 pages).

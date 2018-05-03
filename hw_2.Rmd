@@ -5,13 +5,14 @@ date: "April 19, 2018"
 output: 
   pdf_document: 
     toc: true
-    toc_depth: 2
+    toc_depth: 3
     keep_tex: no
     latex_engine: xelatex
     fig_caption: no
 geometry: "left = .5in, right = .5in, top = .75in, bottom = .75in"
 header-includes:
    - \usepackage{booktabs}
+   - \usepackage{lscape}
 mainfont: Times New Roman
 ---
 
@@ -36,6 +37,9 @@ congress <- read_csv("./congress.csv")
 ## Problem 1 - U.S. House of Representatives
 
 ### Part a
+
+The time-series does show evidence of a substantial shock in 1994 where the average through the first portion of the series ($\approx$ 46 seat majority) does not approximate the short-run average post-1994 ($\approx$ -7). The ACF and PACF suggest that the time-series may be autoregressive order 1 before demeaning to the series, though there is not a strict pattern of geometric decline from L1. The Phillips-Perron and Augmented Dickey-Fuller tests disagree with each other, and this lack of conclusive evidence regarding stationarity likely is a function of the short series. Demeaning the series according to the 1994 structural break (i.e. pre and post) shows much stronger evidence in favor of stationarity, and also indicates that the initial evidence of autocorrelation was largely related to pre/post 1994 variation.
+
 
 ```{r 1.a, warning = F}
 #plot ts, ACF, PACF
@@ -65,6 +69,9 @@ ggAcf(ts_house) + #substantial autocorrelation but not quite geometric decline
 ggPacf(ts_house) + #AR(1), phi = .65 ish
   theme_minimal() +
   labs(title = "Democratic House Majority PACF")
+
+PP.test(ts_house)
+tseries::adf.test(ts_house)
 
 #pre-1994 mean for ts
 preMean <- congress %>% 
@@ -102,6 +109,9 @@ ggPacf(ts_house) + #no need for lags
 
 ### Part b 
 
+The AR(0)/OLS model of the Democratic House majority time-series shows support for the coattails theory and for the re-aligment shock in 1994. The clearest relationships are that the Southern re-alignment switched the make-up of the House towards majority-Republican (a difference of nearly 48 seats for pre 1994 elections), and that the party of the newly-elected president (in presidential election years) typically sees a proportional boost in the House. The evidence for the partisan midterm resurgence is a bit uncertain but still suggests that midterms tend to associate with the party not holding the presidency taking back some seats. There doesn't seem to be much salience to unemployment for the Democratic House majority, net of the other covariates. The model tended to miss the true value of the time-series by about 12-14 seats depending on the specification.
+
+
 ```{r 1.b}
 #pull ts, every other year frequency 1963-2017
 ts_house <- ts(congress$DemHouseMaj, 
@@ -124,7 +134,7 @@ armaFit <- function(ts, order = c(0, 0, 0), seasonal.order = c(1, 0, 0),
   lab.order <- paste0("(", order[1], ",", order[2], ",", order[3], ")")
   aic <- round(mod[['aic']], 3)
   rmse <- round(sqrt(mean((ts - mod$fitted)^2)), 3)
-  se_reg <- round(sqrt(mod[['sigma2']]), 3)
+  lenT <- length(ts)
   
   phi1 <- round(mod$coef["ar1"], 3)
   phi2 <- round(mod$coef["ar2"], 3)
@@ -136,7 +146,10 @@ armaFit <- function(ts, order = c(0, 0, 0), seasonal.order = c(1, 0, 0),
   sar1 <- ifelse(is.na(sar1), "", sar1)
 
   coef <- round(mod[['coef']], 3)
-  coef <- round(coef[c((length(coef)-2), (length(coef)-1), length(coef))], 3)
+  coef <- round(coef[c((length(coef)-3), 
+                       (length(coef)-2),
+                       (length(coef)-1),
+                       length(coef))], 3)
   
   se <- round(sqrt(diag(mod[['var.coef']])), 3)
   se_phi1 <- round(se["ar1"], 3)
@@ -147,20 +160,22 @@ armaFit <- function(ts, order = c(0, 0, 0), seasonal.order = c(1, 0, 0),
   se_phi2 <- ifelse(is.na(se_phi2), "", se_phi2)
   se_psi1 <- ifelse(is.na(se_psi1), "", se_psi1)
   se_sar1 <- ifelse(is.na(se_sar1), "", se_sar1)
-  se <- round(se[c((length(se)-2), (length(se)-1), length(se))], 3)
+  se <- round(se[c((length(se)-3), 
+                   (length(se)-2),
+                   (length(se)-1),
+                   length(se))], 3)
 
-  
-  names(lab.order) <- "ARMA Model"
+  names(lab.order) <- "Order"
   names(aic) <- "AIC"
   names(rmse) <- "RMSE"
+  names(lenT) <- "$T$"
   names(phi1) <- "$\\phi_1$"
   names(phi2) <- "$\\phi_2$"
   names(psi1) <- "$\\psi_1$"
-  names(sar1) <- "Seasonal $\\phi_1$"
-  names(se_reg) <- "Std. Err"
+  names(sar1) <- "S$\\phi_1$"
   
-  oneline <- c(lab.order, aic, rmse, se_reg, phi1, phi2, psi1, sar1, coef)
-  twoline <- c("", "", "", "", 
+  oneline <- c(lab.order, aic, rmse, lenT, phi1, phi2, psi1, sar1, coef)
+  twoline <- c("", "", "", "",
                ifelse(se_phi1 == "", "", paste0("(", se_phi1, ")")),
                ifelse(se_phi2 == "", "", paste0("(", se_phi2, ")")),
                ifelse(se_psi1 == "", "", paste0("(", se_psi1, ")")),
@@ -182,6 +197,8 @@ print(xtable(ar0, digits = 3), booktabs = T, include.rownames = FALSE,
 ```
 
 ### Part c
+
+Across the 5 specifications, there is fairly robust support for the 1994 structural break and the importance of presidential coattails. The partisan unemployment theory receives pretty weak support, since the coefficient is uncertain through 4 out of 5 specifications. The 5 models are largely indistinguishable in terms of AIC, and both the RMSE and SE of the regression are all relatively close across models too. The ARMA(1, 1) performs best in-sample, though this is somewhat expected given the additional model parameters. Accordingly, the improvement in fit for including both autoregressive and moving-average term is weaker than would be expected if the two parameters were both necessary (the AR(2) is similar in this respect). All models miss the true values of the time-series they were trained on by about 14 or 15 seats.
 
 ```{r 1.c, warning = F, message = F}
 #AR(1)
@@ -206,6 +223,8 @@ print(xtable(sums, digits = 3), booktabs = T, include.rownames= FALSE,
 ```
 
 ### Part d
+
+The best model given the in-sample and out-of-sample goodness of fit indicators is the AR(1). The in-sample indicators would suggest (somewhat weakly) that the ARMA(1,1) is the best model, however this more complicated model actually predicts worse out-of-sample compared to the simpler AR(1) specification. Given that the two fits between AR(1) and ARMA(1,1) are not all that different, I'd opt for the more parsimonious model. The ARMA(1,1)'s psi of 1.0 is suspect too, though I'm less certain that this is a fatal flaw so much as a sign of odd fit.
 
 ```{r 1.d}
 #ar0
@@ -263,6 +282,8 @@ print(xtable(forecastMAE), booktabs = T, include.rownames=FALSE)
 
 
 ### Part e
+
+The coattails effect is what the scenarios highlight more than anything. The unemployment rate is fairly inconsequential for the level of the forecasts, however, predicting that the Democrats lose the presidential election in 2020 would essentially wipe out the forecasted increase in Democratic House seats for h=2 and h=3. The variation around the predictions is somewhat large though---e.g. f
 
 ```{r}
 #selecting AR(1) as final model
@@ -467,8 +488,9 @@ ar1_sar1[1,1] <- "(1, 0, 0)(1, 0, 0)"
 sums <- rbind(ar0, ar1, ar2, ma1, arma11, ar1_sar1)
 ```
 
-```{r, results = "asis"}
+\begin{landscape}
+```{r, echo = F, results = "asis"}
 print(xtable(sums), booktabs = T, include.rownames = FALSE,
       sanitize.colnames.function=function(x){x})
 ```
-
+\end{landscape}
