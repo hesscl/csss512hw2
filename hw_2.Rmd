@@ -2,7 +2,17 @@
 title: "CSSS 512 HW 2"
 author: "Chris Hess"
 date: "April 19, 2018"
-output: html_document
+output: 
+  pdf_document: 
+    toc: true
+    toc_depth: 2
+    keep_tex: no
+    latex_engine: xelatex
+    fig_caption: no
+geometry: "left = .5in, right = .5in, top = .75in, bottom = .75in"
+header-includes:
+   - \usepackage{booktabs}
+mainfont: Times New Roman
 ---
 
 ```{r setup, include=FALSE, echo=F, results='hide'}
@@ -17,6 +27,7 @@ library(xtable)
 
 #options
 options(xtable.comment = FALSE)
+knitr::opts_chunk$set(strip.white = F)
 
 #data from Chris's website
 congress <- read_csv("./congress.csv")
@@ -101,26 +112,60 @@ ts_house <- ts(congress$DemHouseMaj,
 covar <- congress %>% select(PartisanMidterm, PartisanUnem, Coattails, Pre1994)
 
 #function to provide sum stats that can be passed to xtable()
-armaFit <- function(ts, order = c(0, 0, 0), seasonal.order = c(1, 0, 0), seasonal.period = NA, xdf = NULL){
+armaFit <- function(ts, order = c(0, 0, 0), seasonal.order = c(1, 0, 0), 
+                    seasonal.period = NA, xdf = NULL){
   if(is.na(seasonal.period)){
     mod <- Arima(ts, order = order, xreg = xdf)
   } else{
-    mod <- Arima(ts, order = order, seasonal = list(order = seasonal.order, period = seasonal.period), xreg = xdf)
+    mod <- Arima(ts, order = order, 
+                 seasonal = list(order = seasonal.order, 
+                                 period = seasonal.period), xreg = xdf)
   }
   lab.order <- paste0("(", order[1], ",", order[2], ",", order[3], ")")
-  aic <- mod[['aic']]
-  se_reg <- sqrt(mod[['sigma2']])
-  coef <- mod[['coef']]
-  coef <- coef[c((length(coef)-2), (length(coef)-1), length(coef))]
-  se <- sqrt(diag(mod[['var.coef']]))
-  se <- se[c((length(se)-2), (length(se)-1), length(se))]
+  aic <- round(mod[['aic']], 3)
+  rmse <- round(sqrt(mean((ts - mod$fitted)^2)), 3)
+  se_reg <- round(sqrt(mod[['sigma2']]), 3)
+  
+  phi1 <- round(mod$coef["ar1"], 3)
+  phi2 <- round(mod$coef["ar2"], 3)
+  psi1 <- round(mod$coef["ma1"], 3)
+  sar1 <- round(mod$coef["sar1"], 3)
+  phi1 <- ifelse(is.na(phi1), "", phi1)
+  phi2 <- ifelse(is.na(phi2), "", phi2)
+  psi1 <- ifelse(is.na(psi1), "", psi1)
+  sar1 <- ifelse(is.na(sar1), "", sar1)
+
+  coef <- round(mod[['coef']], 3)
+  coef <- round(coef[c((length(coef)-2), (length(coef)-1), length(coef))], 3)
+  
+  se <- round(sqrt(diag(mod[['var.coef']])), 3)
+  se_phi1 <- round(se["ar1"], 3)
+  se_phi2 <- round(se["ar2"], 3)
+  se_psi1 <- round(se["ma1"], 3)
+  se_sar1 <- round(se["sar1"], 3)
+  se_phi1 <- ifelse(is.na(se_phi1), "", se_phi1)
+  se_phi2 <- ifelse(is.na(se_phi2), "", se_phi2)
+  se_psi1 <- ifelse(is.na(se_psi1), "", se_psi1)
+  se_sar1 <- ifelse(is.na(se_sar1), "", se_sar1)
+  se <- round(se[c((length(se)-2), (length(se)-1), length(se))], 3)
+
   
   names(lab.order) <- "ARMA Model"
   names(aic) <- "AIC"
-  names(se_reg) <- "Std. Err Regressi"
+  names(rmse) <- "RMSE"
+  names(phi1) <- "$\\phi_1$"
+  names(phi2) <- "$\\phi_2$"
+  names(psi1) <- "$\\psi_1$"
+  names(sar1) <- "Seasonal $\\phi_1$"
+  names(se_reg) <- "Std. Err"
   
-  oneline <- c(lab.order, aic, se_reg, coef)
-  twoline <- c("", "", "", paste0("(", se, ")"))
+  oneline <- c(lab.order, aic, rmse, se_reg, phi1, phi2, psi1, sar1, coef)
+  twoline <- c("", "", "", "", 
+               ifelse(se_phi1 == "", "", paste0("(", se_phi1, ")")),
+               ifelse(se_phi2 == "", "", paste0("(", se_phi2, ")")),
+               ifelse(se_psi1 == "", "", paste0("(", se_psi1, ")")),
+               ifelse(se_sar1 == "", "", paste0("(", se_sar1, ")")),
+               paste0("(", se, ")"))
   lines <- rbind(oneline, twoline)
   rownames(lines) <- NULL
   
@@ -129,13 +174,11 @@ armaFit <- function(ts, order = c(0, 0, 0), seasonal.order = c(1, 0, 0), seasona
 
 #AR(0) with covariates
 ar0 <- armaFit(ts_house, order = c(0, 0, 0), xdf = covar)
-coef_ar0 <- stargazer(arima(ts_house, order = c(0, 0, 0), xreg = covar))
 ```
 
 ```{r, results = "asis"}
-xtable(ar0)
-
-coef_ar0
+print(xtable(ar0, digits = 3), booktabs = T, include.rownames = FALSE,
+      sanitize.colnames.function=function(x){x})
 ```
 
 ### Part c
@@ -143,65 +186,87 @@ coef_ar0
 ```{r 1.c, warning = F, message = F}
 #AR(1)
 ar1 <- armaFit(ts_house, order = c(1, 0, 0), xdf = covar)
-tab.ar1 <- xtable(ar1)
 
 #AR(2)
 ar2 <- armaFit(ts_house, order = c(2, 0, 0), xdf = covar)
-tab.ar2 <- xtable(ar2)
 
 #MA(1)
 ma1 <- armaFit(ts_house, order = c(0, 0, 1), xdf = covar)
-tab.ma1 <- xtable(ma1)
 
 #ARMA(1,1)
 arma11 <- armaFit(ts_house, order = c(1, 0, 1), xdf = covar)
-tab.arma11 <- xtable(arma11)
 
 #bind the sum stat rows together
 sums <- rbind(ar0, ar1, ar2, ma1, arma11)
-coef_mods <- stargazer(arima(ts_house, order = c(0, 0, 0), xreg = covar),
-                       arima(ts_house, order = c(1, 0, 0), xreg = covar),
-                       arima(ts_house, order = c(2, 0, 0), xreg = covar),
-                       arima(ts_house, order = c(0, 0, 1), xreg = covar),
-                       arima(ts_house, order = c(1, 0, 1), xreg = covar))
 ```
 
 ```{r, results = "asis"}
-xtable(sums)
-
-coef_mods
+print(xtable(sums, digits = 3), booktabs = T, include.rownames= FALSE,
+      sanitize.colnames.function=function(x){x})
 ```
 
 ### Part d
 
 ```{r 1.d}
+#ar0
 f_ar0 <- function(x, h){forecast(Arima(x, order=c(0,0,0)), h=h)}
 e_ar0 <- tsCV(ts_house, f_ar0, h = 3,
               window = 20)
+mae_ar0 <- round(apply(e_ar0, 2, function(x){mean(abs(ts_house - x), na.rm = T)}), 3)
+avg_mae_ar0 <- round(mean(mae_ar0), 3)
+names(avg_mae_ar0) <- "avgMAE"
+e_ar0 <- c(ar0[1, 1], ar0[1, 2], ar0[1, 3], mae_ar0, avg_mae_ar0)
 
+#ar1
 f_ar1 <- function(x, h){forecast(Arima(x, order=c(1,0,0)), h=h)}
 e_ar1 <- tsCV(ts_house, f_ar1, h = 3,
               window = 20)
+mae_ar1 <- round(apply(e_ar1, 2, function(x){mean(abs(ts_house - x), na.rm = T)}), 3)
+avg_mae_ar1 <- round(mean(mae_ar1), 3)
+names(avg_mae_ar1) <- "avgMAE"
+e_ar1 <- c(ar1[1, 1], ar1[1, 2], ar1[1, 3], mae_ar1, avg_mae_ar1)
 
+#ar2
 f_ar2 <- function(x, h){forecast(Arima(x, order=c(2,0,0)), h=h)}
-e_ar2 <- tsCV(ts_house, far2, h = 3,
+e_ar2 <- tsCV(ts_house, f_ar2, h = 3,
               window = 20)
+mae_ar2 <- round(apply(e_ar2, 2, function(x){mean(abs(ts_house - x), na.rm = T)}), 3)
+avg_mae_ar2 <- round(mean(mae_ar2), 3)
+names(avg_mae_ar2) <- "avgMAE"
+e_ar2 <- c(ar2[1, 1], ar2[1, 2], ar2[1, 3], mae_ar2, avg_mae_ar2)
 
+#ma1
 f_ma1 <- function(x, h){forecast(Arima(x, order=c(0,0,1)), h=h)}
 e_ma1 <- tsCV(ts_house, f_ma1, h = 3,
               window = 20)
+mae_ma1 <- round(apply(e_ma1, 2, function(x){mean(abs(ts_house - x), na.rm = T)}), 3)
+avg_mae_ma1 <- round(mean(mae_ma1), 3)
+names(avg_mae_ma1) <- "avgMAE"
+e_ma1 <- c(ma1[1, 1], ma1[1, 2], ma1[1, 3], mae_ma1, avg_mae_ma1)
 
+#arma1,1
 f_arma11 <- function(x, h){forecast(Arima(x, order=c(1,0,1)), h=h)}
 e_arma11 <- tsCV(ts_house, f_arma11, h = 3,
               window = 20)
+mae_arma11 <- round(apply(e_arma11, 2, function(x){mean(abs(ts_house - x), na.rm = T)}), 3)
+avg_mae_arma11 <- round(mean(mae_arma11), 3)
+names(avg_mae_arma11) <- "avgMAE"
+e_arma11 <- c(arma11[1, 1], arma11[1, 2], arma11[1, 3], mae_arma11, avg_mae_arma11)
+
+#compile model fit stats
+forecastMAE <- rbind(e_ar0, e_ar1, e_ar2, e_ma1, e_arma11)
+```
+
+```{r, results = "asis"}
+print(xtable(forecastMAE), booktabs = T, include.rownames=FALSE)
 ```
 
 
 ### Part e
 
 ```{r}
-#selecting ARMA(1,1) as final model
-arma11 <- Arima(ts_house, order = c(1, 0, 1), xreg = covar)
+#selecting AR(1) as final model
+ar1 <- Arima(ts_house, order = c(1, 0, 0), xreg = covar)
 
 #counterfactual 1 - unemployment stays at 4.6% for all three elections
 cf1 <- data.frame(
@@ -213,7 +278,7 @@ cf1 <- data.frame(
 cf1
 
 #forecast forward three periods based on cf1 X's
-pred_cf1 <- predict(arma11, newxreg = cf1)
+pred_cf1 <- predict(ar1, newxreg = cf1)
 
 ##counterfactual 2 - unemployment falls to 3.6% for all three elections
 cf2 <- data.frame(
@@ -225,7 +290,7 @@ cf2 <- data.frame(
 cf2
 
 #forecast forward three periods based on cf2 X's
-pred_cf2 <- predict(arma11, newxreg = cf2)
+pred_cf2 <- predict(ar1, newxreg = cf2)
 
 ##counterfactual 2 - unemployment rises to 5.6% for all three elections
 cf3 <- data.frame(
@@ -237,13 +302,12 @@ cf3 <- data.frame(
 cf3
 
 #forecast forward three periods based on cf2 X's
-pred_cf3 <- predict(arma11, newxreg = cf3)
+pred_cf3 <- predict(ar1, newxreg = cf3)
 
 #construct tidy matrix for value, upper and lower
-pred_vals <- rbind(pred_cf1$pred[1], pred_cf1$pred[1]+1.96*pred_cf1$se, pred_cf1$pred[1]-1.96*pred_cf1$se)
 pred_vals <- data.frame(
   cf = c(rep("Scenario 1", 3), rep("Scenario 2", 3), rep("Scenario 3", 3)),
-  time = rep(seq(1, 3), 3),
+  time = rep(c(2019, 2021, 2023), 3),
   values = c(pred_cf1$pred, pred_cf2$pred, pred_cf3$pred),
   upper = c(pred_cf1$pred[1]+1.96*pred_cf1$se,
             pred_cf1$pred[2]+1.96*pred_cf1$se,
@@ -264,21 +328,28 @@ pred_vals <- data.frame(
             pred_cf3$pred[2]-1.96*pred_cf3$se,
             pred_cf3$pred[3]-1.96*pred_cf3$se))
 
-ggplot(pred_vals, aes(x = time, y = values, ymin = lower, ymax = upper, group = cf, color = cf, fill = cf)) +
-  geom_line() +
-  geom_point() +
-  geom_ribbon(color = NA, alpha = .25) +
-  scale_x_continuous(breaks = c(1, 2, 3), labels = c("2019", "2021", "2023")) +
+ggplot() +
+  geom_line(data=pred_vals, aes(x = time, y = values, 
+                                group = cf, color = cf)) +
+  geom_point(data = pred_vals, aes(x = time, y = values, 
+                                   group = cf, shape = cf, color = cf),
+             size = 3) +
+  geom_ribbon(data = pred_vals, aes(x = time, ymin = lower, ymax = upper, 
+                                   group = cf, fill = cf),
+              color = NA, alpha = .25) +
+  geom_line(data = congress %>% filter(StartYear >= 2000), aes(x = StartYear, y = DemHouseMaj), 
+            color = "black") +
+  scale_x_continuous() +
   xlab("\nStart Year of Congress") +
   ylab("Predicted House Dem Share\n") +
   labs(subtitle = "Shaded area denotes 95% predictive interval",
-       fill = "Counterfactual",
-       color = "Counterfactual") +
+       fill = "Counterfactual\nForecast",
+       color = "Counterfactual\nForecast",
+       shape = "Counterfactual\nForecast") +
   theme_minimal()
 ```
 
 ## Problem 2 - U.S. Senate
-
 
 ### Part a
 
@@ -309,7 +380,7 @@ ggAcf(ts_senate) + #could be AR(1)
 #observed PACF
 ggPacf(ts_senate) + #AR(1), phi = .65 ish
   theme_minimal() +
-  labs(title = "Democratic senate Majority PACF")
+  labs(title = "Democratic Senate Majority PACF")
 
 #pre-1994 mean for ts
 preMean <- congress %>% 
@@ -347,7 +418,7 @@ ggPacf(ts_senate) + #need an AR(1) with phi = .6 for this ts
 
 ### Part b 
 
-```{r 1.b}
+```{r 2.b}
 #pull ts, every other year frequency 1963-2017
 ts_senate <- ts(congress$DemSenateMaj, 
                frequency = 1/2,
@@ -377,25 +448,27 @@ tab.arma11 <- xtable(arma11)
 
 #bind the sum stat rows together
 sums <- rbind(ar0, ar1, ar2, ma1, arma11)
-coef_mods <- stargazer(arima(ts_senate, order = c(0, 0, 0), xreg = covar),
-                       arima(ts_senate, order = c(1, 0, 0), xreg = covar),
-                       arima(ts_senate, order = c(2, 0, 0), xreg = covar),
-                       arima(ts_senate, order = c(0, 0, 1), xreg = covar),
-                       arima(ts_senate, order = c(1, 0, 1), xreg = covar))
 ```
 
 ```{r, results = "asis"}
-xtable(sums)
-
-coef_mods
+print(xtable(sums), booktabs = T, include.rownames = FALSE,
+      sanitize.colnames.function=function(x){x})
 ```
 
 ### Part c
 
-```{r, warning = FALSE, message = FALSE}
-ar1_seas1 <- armaFit(ts_senate, order = c(1, 0, 0), seasonal.order = c(1, 0, 0), seasonal.period = 3,
-                xdf = covar)
-summary(ar1_seas1)
-stargazer(arima(ts_senate, order = c(1, 0, 0), seasonal = list(order = c(1, 0, 0), period = 3), xreg = covar))
+```{r 2.c}
+ar1_sar1 <- armaFit(ts_senate, 
+                  order = c(1, 0, 0), 
+                  seasonal.order = c(1, 0, 0),
+                  seasonal.period = 3, 
+                  xdf = covar)
+ar1_sar1[1,1] <- "(1, 0, 0)(1, 0, 0)"
+sums <- rbind(ar0, ar1, ar2, ma1, arma11, ar1_sar1)
+```
+
+```{r, results = "asis"}
+print(xtable(sums), booktabs = T, include.rownames = FALSE,
+      sanitize.colnames.function=function(x){x})
 ```
 
