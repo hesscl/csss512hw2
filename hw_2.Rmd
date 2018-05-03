@@ -13,7 +13,6 @@ geometry: "left = .5in, right = .5in, top = .75in, bottom = .75in"
 header-includes:
    - \usepackage{booktabs}
    - \usepackage{lscape}
-mainfont: Times New Roman
 ---
 
 ```{r setup, include=FALSE, echo=F, results='hide'}
@@ -283,7 +282,7 @@ print(xtable(forecastMAE), booktabs = T, include.rownames=FALSE)
 
 ### Part e
 
-The coattails effect is what the scenarios highlight more than anything. The unemployment rate is fairly inconsequential for the level of the forecasts, however, predicting that the Democrats lose the presidential election in 2020 would essentially wipe out the forecasted increase in Democratic House seats for h=2 and h=3. The variation around the predictions is somewhat large though---e.g. f
+The coattails effect is what the scenarios highlight more than anything---i.e. assuming that the Democrats beat Trump in 2020, they will see the largest gains in their share of House seats relative to the unemployment-related differences. This boost due to coattails will however be approximately halved by a partisan midterm wave. We should have the most certainty about the forecast one election ahead, since this is not adding in forecast error due to multiple forecasts.
 
 ```{r}
 #selecting AR(1) as final model
@@ -292,7 +291,7 @@ ar1 <- Arima(ts_house, order = c(1, 0, 0), xreg = covar)
 #counterfactual 1 - unemployment stays at 4.6% for all three elections
 cf1 <- data.frame(
   "Pre1994" = rep(0, 3), #all forecasts are post1994
-  "ParisanUnemp" = rep(4.6, 3),
+  "ParisanUnemp" = rep(4.6-6.075, 3),
   "PartisanMidterm" = c(-1, 0, 1),
   "Coattails" = c(0, 1, 0)
 )
@@ -304,7 +303,7 @@ pred_cf1 <- predict(ar1, newxreg = cf1)
 ##counterfactual 2 - unemployment falls to 3.6% for all three elections
 cf2 <- data.frame(
   "Pre1994" = rep(0, 3), #all forecasts are post1994
-  "ParisanUnemp" = rep(3.6, 3),
+  "ParisanUnemp" = rep(3.6-6.075, 3),
   "PartisanMidterm" = c(-1, 0, 1),
   "Coattails" = c(0, 1, 0)
 )
@@ -316,7 +315,7 @@ pred_cf2 <- predict(ar1, newxreg = cf2)
 ##counterfactual 2 - unemployment rises to 5.6% for all three elections
 cf3 <- data.frame(
   "Pre1994" = rep(0, 3), #all forecasts are post1994
-  "ParisanUnemp" = rep(5.6, 3),
+  "ParisanUnemp" = rep(5.6-6.075, 3),
   "PartisanMidterm" = c(-1, 0, 1),
   "Coattails" = c(0, 1, 0)
 )
@@ -374,6 +373,8 @@ ggplot() +
 
 ### Part a
 
+The observed time-series has similar evidence of the 1994 structural break, and otherwise the ACF and PACF does show evidence suggestive of an AR(1) process. The PP test and Dickey-Fuller tests both indicate non-stationarity in the observed time-series, though demeaning the data according to pre/post 1994 periods creates a time-series that looks fairly stationary. Both the ACF and PACF suggest autocorrelation that an AR(1) process with phi of .6 would capture well.
+
 ```{r 2.a, warning = F}
 #plot ts, ACF, PACF
 #run ADF and PP tests
@@ -402,6 +403,9 @@ ggAcf(ts_senate) + #could be AR(1)
 ggPacf(ts_senate) + #AR(1), phi = .65 ish
   theme_minimal() +
   labs(title = "Democratic Senate Majority PACF")
+
+PP.test(ts_senate)
+tseries::adf.test(ts_senate)
 
 #pre-1994 mean for ts
 preMean <- congress %>% 
@@ -438,6 +442,10 @@ ggPacf(ts_senate) + #need an AR(1) with phi = .6 for this ts
 ```
 
 ### Part b 
+
+The best fitting model using AIC and FMSE is the ARMA(1, 1) since this achieves the lowest average model error and is comparable to the MA(2) in terms of AIC. The table of coefficients for the U.S. Senate majority time-series suggests less salience to the coattails theory for the upper chamber of Congress. Instead, the only robust features predicting substantive differences in the Democratic Senate majority over the time-series are the unemployment rate and the structural break for 1994. The evidence for Partisan midterm swings is fairly weak.
+
+The overall takeaways relative to the House models are that the direction the presidency goes is less predictive for senate races and that there is some significance to higher than average unemployment levels as predicting worse outcomes for Democrats.
 
 ```{r 2.b}
 #pull ts, every other year frequency 1963-2017
@@ -477,6 +485,8 @@ print(xtable(sums), booktabs = T, include.rownames = FALSE,
 ```
 
 ### Part c
+
+The AR(1,)(1)$_3$ model does not perform as well as the ARMA(1,1) in terms of overall fit, but does find a fairly precise cycle for every three periods that coincides with the three classes of senators and their respective order of elections. The negative phi for multiplicative seasonality suggests that historical levels of Democratic Senate majority for first-class, second-class and third-class Senate elections predict a 50\% inverse for the respective elections in the next cycle (holding the other covariates constant). For instance, if a first-class senator is elected at a high point of Democratic Senate Majority, the next time this class is up again the effect of seasonal history will be to bring the predictions back towards 0 (i.e. 50-50 Dem:Rep).
 
 ```{r 2.c}
 ar1_sar1 <- armaFit(ts_senate, 
